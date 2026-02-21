@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>ইফতার·বিরিয়ানি · মিনিমাল elegance</title>
+  <!-- গুগল ফন্ট (হিন্দ সিলিগুড়ি + ইন্টার) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- লিফলেট ও ফ্যান্সিবক্স -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #f9f6f2;  /* উষ্ম ক্রিম */
+      font-family: 'Inter', 'Hind Siliguri', sans-serif;
+      padding: 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      color: #2d3e3a;
+    }
+    #app {
+      max-width: 1200px;
+      width: 100%;
+    }
+    /* ===== এলিগেন্ট হেডার ===== */
+    .elegant-header {
+      background: #ffffff;
+      border-radius: 32px;
+      padding: 1.2rem 2.2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 30px rgba(0, 40, 20, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      border: 1px solid #eae2d7;
+    }
+    .logo-elegant {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #2a5e49;
+      letter-spacing: -0.3px;
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+    .pill-live {
+      background: #e8f3ee;
+      color: #1b6e51;
+      padding: 0.5rem 1.8rem;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 1rem;
+      border: 1px solid #c7e3d7;
+    }
+    /* ===== সফল টুলবার ===== */
+    .soft-toolbar {
+      background: white;
+      border-radius: 60px;
+      padding: 0.4rem 0.4rem 0.4rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 2rem;
+      box-shadow: 0 6px 18px rgba(50, 60, 45, 0.04);
+      border: 1px solid #dde9e2;
+    }
+    .soft-toolbar input {
+      flex: 1 1 220px;
+      background: #f9fcfb;
+      border: 1px solid #cbdcd2;
+      border-radius: 60px;
+      padding: 0.9rem 1.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: #1f4237;
+      outline: none;
+    }
+    .soft-toolbar input::placeholder { color: #98afa5; }
+    .filter-elegant {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-soft {
+      background: #f4faf7;
+      border: 1px solid #cde3da;
+      color: #1c5341;
+      padding: 0.6rem 1.6rem;
+      border-radius: 50px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-soft.active {
+      background: #2e6b55;
+      border-color: #2e6b55;
+      color: white;
+    }
+    /* ===== ম্যাপ – মিনিমাল ===== */
+    .map-elegant {
+      background: white;
+      border-radius: 48px;
+      padding: 1rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 28px rgba(30, 50, 40, 0.02);
+      border: 1px solid #d2e3db;
+    }
+    #map {
+      height: 280px;
+      border-radius: 36px;
+      border: 1px solid #e5f0ea;
+    }
+    .map-footer-elegant {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .locate-soft {
+      background: #f5fbf8;
+      border: 1px solid #b9d9cd;
+      color: #1c5c45;
+      padding: 0.6rem 2rem;
+      border-radius: 60px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .stats-soft {
+      background: #f9fefb;
+      border: 1px solid #c6ded3;
+      border-radius: 60px;
+      padding: 0.5rem 2rem;
+      color: #2d5f4b;
+      font-weight: 500;
+    }
+    /* ===== কার্ড – এলিগেন্ট মিনিমাল ===== */
+    .locations-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+      margin-bottom: 3rem;
+    }
+    .card-minimal {
+      background: white;
+      border-radius: 40px;
+      padding: 2rem 2rem 1.6rem;
+      box-shadow: 0 12px 35px -8px rgba(10, 30, 20, 0.06);
+      border: 1px solid #e5f0ea;
+      transition: 0.2s;
+    }
+    .card-minimal.verified {
+      border-left: 18px solid #f2b05e;
+      background: #fffdf9;
+    }
+    .verified-marker {
+      background: #f2b05e;
+      color: #2d3e2d;
+      padding: 0.2rem 1.4rem;
+      border-radius: 60px;
+      display: inline-block;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.6rem;
+      border: 1px solid #ec9f3f;
+    }
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .name-bn {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1c4e3c;
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+    .name-en {
+      color: #5d8b78;
+      background: #ecf6f1;
+      padding: 0.2rem 1.3rem;
+      border-radius: 40px;
+      width: fit-content;
+      font-size: 0.95rem;
+      margin: 0.3rem 0;
+    }
+    .dist-soft {
+      background: #ecf6f1;
+      color: #186249;
+      padding: 0.4rem 1.8rem;
+      border-radius: 60px;
+      font-weight: 500;
+      border: 1px solid #bdd9cd;
+    }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem 2.5rem;
+      margin: 1rem 0 1rem;
+    }
+    .meta-soft {
+      background: #f7fcf9;
+      border: 1px solid #d1e8de;
+      border-radius: 60px;
+      padding: 0.3rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #265f49;
+    }
+    .desc-soft {
+      background: #fafdfb;
+      border: 1px solid #d0e9de;
+      border-radius: 28px;
+      padding: 1.1rem 1.6rem;
+      margin: 1rem 0 1rem;
+      color: #2b4f40;
+      font-size: 1rem;
+    }
+    .contact-photo-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2rem;
+      margin: 1.2rem 0;
+    }
+    .contact-soft {
+      background: #eaf6f0;
+      border: 1px solid #bad7ca;
+      padding: 0.5rem 2rem;
+      border-radius: 60px;
+      font-weight: 500;
+      color: #0e523b;
+    }
+    .photo-soft {
+      width: 76px;
+      height: 76px;
+      border-radius: 28px;
+      object-fit: cover;
+      border: 2px solid #e1f0e8;
+      background: #f1f9f4;
+      cursor: pointer;
+    }
+    /* ভোট সেকশন – ক্লিন */
+    .vote-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2rem;
+      border-top: 2px solid #e3f0ea;
+      padding-top: 1.2rem;
+    }
+    .vote-num {
+      background: #f2faf6;
+      border: 1px solid #cbe3d9;
+      border-radius: 60px;
+      padding: 0.4rem 2rem;
+      font-weight: 600;
+      color: #1d644b;
+    }
+    .vote-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    .vote-btn-soft {
+      background: white;
+      border: 2px solid #bcd9cd;
+      color: #215f48;
+      padding: 0.5rem 2rem;
+      border-radius: 60px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .vote-btn-soft.real:hover:not(:disabled) { background: #dcf5ea; border-color: #58b894; }
+    .vote-btn-soft.fake:hover:not(:disabled) { background: #ffebeb; border-color: #e09898; color: #a13d3d; }
+    .vote-btn-soft:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #f1f1f1;
+      border-color: #c0c0c0;
+    }
+    .voted-soft {
+      background: #e2efe9;
+      color: #1d6049;
+      padding: 0.3rem 1.3rem;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    /* ===== ফর্ম – নরম ===== */
+    .form-soft {
+      background: white;
+      border-radius: 60px;
+      padding: 2.5rem 2.2rem;
+      box-shadow: 0 12px 40px -10px rgba(40, 60, 45, 0.06);
+      border: 1px solid #e1eee7;
+    }
+    .form-title-soft {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #235d48;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #d6ebe1;
+      display: inline-block;
+    }
+    .grid-soft {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 1.5rem;
+    }
+    .field-soft label {
+      font-weight: 600;
+      color: #296a51;
+      display: block;
+      font-size: 0.95rem;
+    }
+    .field-soft input, .field-soft textarea {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      background: #f9fefb;
+      border: 1px solid #d1e6dc;
+      border-radius: 50px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+    }
+    .submit-soft {
+      background: #276e55;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1.5rem;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 2rem;
+      box-shadow: 0 6px 16px rgba(40, 100, 70, 0.15);
+      transition: 0.15s;
+    }
+    .submit-soft:hover { background: #1e5b45; }
+    .note-footer {
+      text-align: center;
+      margin-top: 1.2rem;
+      color: #3b6f5a;
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- হেডার – কোন গ্লো নেই -->
+  <div class="elegant-header">
+    <div class="logo-elegant">🍛 ইফতার · বিরিয়ানি</div>
+    <div class="pill-live">⚡ লাইভ কমিউনিটি</div>
+  </div>
+
+  <div class="soft-toolbar">
+    <input type="text" id="searchField" placeholder="🔍 নাম বা এলাকা লিখুন...">
+    <div class="filter-elegant">
+      <span class="filter-soft active" id="filterAll">সব 🍽️</span>
+      <span class="filter-soft" id="filterVerified">⭐ সত্যায়িত</span>
+      <span class="filter-soft" id="filterNearby">📍 কাছের</span>
+    </div>
+  </div>
+
+  <div class="map-elegant">
+    <div id="map"></div>
+    <div class="map-footer-elegant">
+      <button class="locate-soft" id="locateBtn"><span>📍</span> আমার অবস্থান</button>
+      <span class="stats-soft" id="mapStats">মার্কার লোড হচ্ছে...</span>
+    </div>
+  </div>
+
+  <div id="locationsGrid" class="locations-grid"></div>
+
+  <div class="form-soft">
+    <div class="form-title-soft">➕ নতুন জায়গা যোগ করুন</div>
+    <form id="addLocationForm">
+      <div class="grid-soft">
+        <div class="field-soft"><label>🍲 নাম (বাংলা)</label><input type="text" id="locNameBn" required></div>
+        <div class="field-soft"><label>🇬🇧 Name (Eng)</label><input type="text" id="locNameEn"></div>
+      </div>
+      <div class="field-soft"><label>📍 ঠিকানা</label><input type="text" id="locAddress" required></div>
+      <div class="grid-soft">
+        <div class="field-soft"><label>📅 তারিখ</label><input type="text" id="locDate" placeholder="২৫ মার্চ ২০২৫" required></div>
+        <div class="field-soft"><label>⏰ সময়</label><input type="text" id="locTime" placeholder="সন্ধ্যা ৭:৩০" required></div>
+      </div>
+      <div class="field-soft"><label>📝 বর্ণনা</label><textarea id="locDesc" rows="2" required></textarea></div>
+      <div class="grid-soft">
+        <div class="field-soft"><label>📞 যোগাযোগ</label><input type="text" id="locContact" required></div>
+        <div class="field-soft"><label>🖼️ ছবির লিংক</label><input type="url" id="locPhoto"></div>
+      </div>
+      <div class="grid-soft">
+        <div class="field-soft"><label>🗺️ অক্ষাংশ</label><input type="text" id="locLat" placeholder="23.8103"></div>
+        <div class="field-soft"><label>🗺️ দ্রাঘিমাংশ</label><input type="text" id="locLng" placeholder="90.4125"></div>
+      </div>
+      <button type="submit" class="submit-soft">✅ লাইভ ডাটাবেসে যোগ করুন</button>
+    </form>
+    <div class="note-footer">✨ আপনি একবার মাত্র রিয়েল/ফেক ভোট দিতে পারবেন</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<script>
+  (function() {
+    const BIN_ID = '67b8a5d0e41b4d34e493d3b8';
+    const API_KEY = '$2a$10$P.8d4hGXkF5zM6yJ7kLx8eNqW3sT1vR9bQ2cD4fH6jK1mN0pR5sT7vY';
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+    const PUT_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+    let locations = [];
+    let userLatLng = null;
+    let map, userMarker;
+    let activeFilter = 'all';
+
+    const VOTE_KEY = 'iftar_votes_elegant';
+    function getVoted() { return new Set(JSON.parse(localStorage.getItem(VOTE_KEY) || '[]')); }
+    function addVote(id) { const s = getVoted(); s.add(id); localStorage.setItem(VOTE_KEY, JSON.stringify([...s])); }
+    function hasVoted(id) { return getVoted().has(id); }
+
+    function defaultLocations() {
+      return [
+        { id: 'e1', nameBn: 'আল-নূর মসজিদ', nameEn: 'Al-Noor', address: '১২ মেইন রোড, ঢাকা', date: '২৫ মার্চ', time: 'সন্ধ্যা ৭:০০', description: 'বিরিয়ানি, পাকোড়া, খেজুর, পানি', contact: '০১৯xx-xxxxxx', photoUrl: 'https://images.unsplash.com/photo-1627308595171-d1b5d67126fd?w=100', lat: 23.8103, lng: 90.4125, votesReal: 18, votesFake: 2, verified: true },
+        { id: 'e2', nameBn: 'বিরিয়ানি ফাউন্ডেশন', nameEn: 'Biryani Foundation', address: '৪৪ সবুজ রোড', date: '২৬ মার্চ', time: 'সন্ধ্যা ৬:৪৫', description: 'চিকেন বিরিয়ানি ও জুস', contact: '০৩০০-১২৩৪৫৬৭', photoUrl: 'https://images.unsplash.com/photo-1631515243349-e0f75fcd8dcc?w=100', lat: 23.8041, lng: 90.4152, votesReal: 11, votesFake: 4, verified: false },
+        { id: 'e3', nameBn: 'কমিউনিটি কিচেন', nameEn: 'Community Kitchen', address: '১৭ মার্কেট রোড', date: '২৫ মার্চ', time: 'সন্ধ্যা ৭:১৫', description: 'খেজুর, ফ্রুট চাট, ডাল', contact: 'community@example.com', photoUrl: '', lat: 23.7920, lng: 90.4088, votesReal: 5, votesFake: 1, verified: false },
+        { id: 'e4', nameBn: 'দারুস সালাম', nameEn: 'Dar-us-Salam', address: '৭২/এ বেইলি রোড', date: '২৬ মার্চ', time: '৭:১০ PM', description: 'হালিম, ছোলা, জিলাপি', contact: '০১৭১২৩৪৫৬', photoUrl: 'https://images.unsplash.com/photo-1568909344668-6f5a5fe4a3b6?w=100', lat: 23.8172, lng: 90.4225, votesReal: 22, votesFake: 3, verified: true }
+      ];
+    }
+
+    async function fetchLocations() {
+      try {
+        const res = await fetch(JSONBIN_URL, { headers: { 'X-Master-Key': API_KEY } });
+        const data = await res.json();
+        locations = data.record || [];
+        if (!locations.length) locations = defaultLocations();
+        renderMapMarkers();
+        renderList();
+        document.getElementById('mapStats').innerText = `📍 ${locations.length}টি স্পট`;
+      } catch (e) {
+        locations = defaultLocations();
+        renderMapMarkers();
+        renderList();
+      }
+    }
+    async function saveToBin() { try { await fetch(PUT_URL, { method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':API_KEY}, body:JSON.stringify(locations) }); } catch(e) {} }
+
+    function initMap() {
+      map = L.map('map').setView([23.8103, 90.4125], 12);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+    }
+    function renderMapMarkers() {
+      if (!map) return;
+      map.eachLayer(l => { if (l instanceof L.Marker) map.removeLayer(l); });
+      locations.forEach(loc => { if (loc.lat && loc.lng) L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(loc.nameBn); });
+    }
+
+    document.getElementById('locateBtn').addEventListener('click', () => {
+      navigator.geolocation.getCurrentPosition(pos => {
+        userLatLng = [pos.coords.latitude, pos.coords.longitude];
+        if (userMarker) map.removeLayer(userMarker);
+        userMarker = L.marker(userLatLng, { icon: L.divIcon({ html: '📍', iconSize: [24,24] }) }).addTo(map);
+        map.setView(userLatLng, 14);
+        renderList();
+      }, () => alert('অনুমতি দিন'));
+    });
+
+    function getDistance(lat, lng) {
+      if (!userLatLng) return null;
+      const R = 6371; const dLat = (lat - userLatLng[0])*Math.PI/180; const dLng = (lng - userLatLng[1])*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(userLatLng[0]*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLng/2)**2;
+      return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1);
+    }
+
+    function renderList() {
+      const searchTerm = document.getElementById('searchField').value.toLowerCase();
+      let filtered = locations.filter(l => l.nameBn.toLowerCase().includes(searchTerm) || (l.nameEn && l.nameEn.toLowerCase().includes(searchTerm)) || l.address.toLowerCase().includes(searchTerm));
+      if (activeFilter === 'verified') filtered = filtered.filter(l => l.verified);
+      if (activeFilter === 'nearby' && userLatLng) filtered = filtered.filter(l => l.lat && l.lng).map(l => ({ ...l, dist: parseFloat(getDistance(l.lat, l.lng) || 999) })).sort((a,b) => a.dist - b.dist);
+
+      const grid = document.getElementById('locationsGrid');
+      if (!filtered.length) { grid.innerHTML = `<div style="background:white; border-radius:60px; padding:3rem; text-align:center; border:1px solid #d0e6db;">🍃 কিছু পাওয়া যায়নি</div>`; return; }
+
+      let html = '';
+      filtered.forEach(loc => {
+        const dist = (userLatLng && loc.lat && loc.lng) ? getDistance(loc.lat, loc.lng) : null;
+        const distHtml = dist ? `<span class="dist-soft">🚶 ${dist} কিমি</span>` : '';
+        const verifiedMark = loc.verified ? '<div class="verified-marker">⭐ সত্যায়িত</div>' : '';
+        const photoHtml = loc.photoUrl ? `<a href="${escapeHTML(loc.photoUrl)}" data-fancybox="gal-${loc.id}"><img src="${escapeHTML(loc.photoUrl)}" class="photo-soft"></a>` : '';
+        const voted = hasVoted(loc.id);
+        const realDisabled = voted ? 'disabled' : '';
+        const fakeDisabled = voted ? 'disabled' : '';
+
+        html += `
+          <div class="card-minimal ${loc.verified?'verified':''}">
+            ${verifiedMark}
+            <div class="card-header"><span class="name-bn">${escapeHTML(loc.nameBn)}</span> ${distHtml}</div>
+            ${loc.nameEn ? `<div class="name-en">${escapeHTML(loc.nameEn)}</div>` : ''}
+            <div class="meta-row">
+              <span class="meta-soft">📍 ${escapeHTML(loc.address)}</span>
+              <span class="meta-soft">📅 ${escapeHTML(loc.date)} · ${escapeHTML(loc.time)}</span>
+            </div>
+            <div class="desc-soft">📝 ${escapeHTML(loc.description)}</div>
+            <div class="contact-photo-row">
+              <span class="contact-soft">📞 ${escapeHTML(loc.contact)}</span>
+              ${photoHtml}
+            </div>
+            <div class="vote-row">
+              <span class="vote-num">👍 ${loc.votesReal}  👎 ${loc.votesFake}</span>
+              <div class="vote-actions">
+                <button class="vote-btn-soft real" data-id="${loc.id}" data-vote="real" ${realDisabled}>✓ রিয়েল</button>
+                <button class="vote-btn-soft fake" data-id="${loc.id}" data-vote="fake" ${fakeDisabled}>✗ ফেক</button>
+              </div>
+              ${voted ? '<span class="voted-soft">✔ আপনি ভোট দিয়েছেন</span>' : ''}
+            </div>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+      Fancybox.bind("[data-fancybox]");
+      document.querySelectorAll('.vote-btn-soft:not(:disabled)').forEach(b => b.addEventListener('click', voteHandler));
+    }
+
+    function escapeHTML(s) { return String(s).replace(/[&<>]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c])); }
+
+    async function voteHandler(e) {
+      const btn = e.currentTarget;
+      const id = btn.dataset.id;
+      const vote = btn.dataset.vote;
+      if (hasVoted(id)) { alert('আপনি ইতিমধ্যে ভোট দিয়েছেন!'); renderList(); return; }
+      const loc = locations.find(l => l.id === id);
+      if (!loc) return;
+      if (vote === 'real') loc.votesReal += 1; else loc.votesFake += 1;
+      const total = loc.votesReal + loc.votesFake;
+      if (total >= 3 && loc.votesReal > loc.votesFake * 2) loc.verified = true;
+      else if (loc.votesFake > loc.votesReal * 2) loc.verified = false;
+      addVote(id);
+      await saveToBin();
+      renderList();
+    }
+
+    document.getElementById('addLocationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nameBn = document.getElementById('locNameBn').value.trim();
+      const nameEn = document.getElementById('locNameEn').value.trim();
+      const address = document.getElementById('locAddress').value.trim();
+      const date = document.getElementById('locDate').value.trim() || '২৫ মার্চ';
+      const time = document.getElementById('locTime').value.trim() || 'সন্ধ্যা';
+      const desc = document.getElementById('locDesc').value.trim();
+      const contact = document.getElementById('locContact').value.trim();
+      const photo = document.getElementById('locPhoto').value.trim();
+      const lat = parseFloat(document.getElementById('locLat').value);
+      const lng = parseFloat(document.getElementById('locLng').value);
+      if (!nameBn || !address || !desc || !contact) { alert('বাধ্যতামূলক'); return; }
+      const newLoc = {
+        id: Date.now() + '-' + Math.random().toString(36).substring(2,8),
+        nameBn, nameEn, address, date, time, description: desc, contact,
+        photoUrl: photo || '',
+        lat: isNaN(lat) ? undefined : lat,
+        lng: isNaN(lng) ? undefined : lng,
+        votesReal: 0, votesFake: 0, verified: false
+      };
+      locations.push(newLoc);
+      await saveToBin();
+      if (map && newLoc.lat && newLoc.lng) L.marker([newLoc.lat, newLoc.lng]).addTo(map).bindPopup(newLoc.nameBn);
+      e.target.reset();
+      renderList();
+      alert('✅ লাইভ হয়েছে! সবাই দেখতে পাবে।');
+    });
+
+    document.getElementById('filterAll').addEventListener('click', function() { activeFilter='all'; document.querySelectorAll('.filter-soft').forEach(c=>c.classList.remove('active')); this.classList.add('active'); renderList(); });
+    document.getElementById('filterVerified').addEventListener('click', function() { activeFilter='verified'; document.querySelectorAll('.filter-soft').forEach(c=>c.classList.remove('active')); this.classList.add('active'); renderList(); });
+    document.getElementById('filterNearby').addEventListener('click', function() { if(!userLatLng) { alert('প্রথমে অবস্থান দিন'); return; } activeFilter='nearby'; document.querySelectorAll('.filter-soft').forEach(c=>c.classList.remove('active')); this.classList.add('active'); renderList(); });
+    document.getElementById('searchField').addEventListener('input', renderList);
+
+    window.addEventListener('load', () => { initMap(); fetchLocations(); });
+  })();
+</script>
+</body>
+</html>
